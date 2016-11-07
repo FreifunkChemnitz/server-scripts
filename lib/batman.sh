@@ -60,7 +60,6 @@ batman_wait_for_ll_address() {
 batman_add_all_peers(){
  	for p in "${BATMAN_IFS[@]}"; do
 		batman_add_interface "$p"
-		echo 1 > /sys/class/net/"$p"/batman_adv/no_rebroadcast		
  	done
 
  	batman_setup_interface
