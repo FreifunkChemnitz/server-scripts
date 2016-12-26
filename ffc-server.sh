@@ -28,14 +28,9 @@ ffc_start() {
 	meshviewer_init
 	
 	gre_add_all_tunnels
-	
-	local running_ifnames=$(gre_get_running_ifnames)
-	for i in $running_ifnames; do
-		batman_add_interface "$i"
-		echo 1 > /sys/class/net/"$i"/batman_adv/no_rebroadcast
-	done
-	batman_setup_interface
-	
+
+	batman_add_all_peers
+		
 	[ "$USE_FASTD" = "1" ] && fastd_start
 	[ "$USE_BIRD" = "1" ] && (bird_start ; bird6_start)
 	[ "$USE_DNSMASQ" = "1" ] && dnsmasq_start
