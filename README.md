@@ -117,6 +117,7 @@ cp bird.conf bird.local.conf
 cp dnsmasq.conf dnsmasq.local.conf
 cp general.conf general.local.conf
 touch bird-routes.local.conf
+touch vpn03.local.key
 ```
 
 #### bird.local.conf
