@@ -10,6 +10,7 @@ meshviewer_init() {
 
 # Called by watchdog
 meshviewer_cron() {
+	batman_watchdog
         /opt/freifunk/meshviewer/ffmap-backend/backend.py -d /opt/freifunk/meshviewer/data/ --prune 30 --with-graphite --graphite-host 'gianotti.routers.chemnitz.freifunk.net' --graphite-metrics 'clients,loadavg,memory_usage,rootfs_usage,uptime,traffic.rx.bytes,traffic.tx.bytes,traffic.mgmt_tx.bytes,traffic.mgmt_rx.bytes,traffic.forward.bytes'
 
         jq -c '.nodes = (.nodes | map(del(.value.nodeinfo.owner)))' < /opt/freifunk/meshviewer/data/nodes.json > /opt/freifunk/meshviewer/data/nodes.json.priv.tmp
