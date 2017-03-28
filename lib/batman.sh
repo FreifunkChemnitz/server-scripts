@@ -54,8 +54,6 @@ batman_wait_for_ll_address() {
 		fi
 		sleep 1
 	done
-	
-	sleep 5
 }
 # the check if alfred is running
 batman_watchdog(){
