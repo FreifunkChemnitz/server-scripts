@@ -31,7 +31,7 @@ batman_setup_interface() {
 	
 	if [ "$USE_MESHVIEWER" != "1" ]; then
 		batman_wait_for_ll_address
-		alfred -i bat0 &> /dev/null &
+		alfred -i bat0 -m &> /dev/null &
 		batadv-vis -s &> /dev/null &
 	fi
 }
@@ -56,6 +56,15 @@ batman_wait_for_ll_address() {
 	done
 	
 	sleep 5
+}
+# the check if alfred is running
+batman_watchdog(){
+	if [ "$USE_MESHVIEWER" != "1" ]; then
+		if ! pgrep -x "alfred" > /dev/null
+		then
+    			alfred -i bat0 -m &> /dev/null &
+		fi
+	fi
 }
 
 # adds all peer-interfaces to the mesh
