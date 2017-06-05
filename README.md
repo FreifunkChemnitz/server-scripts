@@ -76,6 +76,7 @@ deb http://httpredir.debian.org/debian/ jessie-backports main
 Anschließend führt man noch folgendes aus:
 ```
 # apt-get update
+# apt-get install fastd
 ```
 
 Wenn sys-V-init verwendet wird:
