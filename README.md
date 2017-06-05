@@ -73,6 +73,10 @@ Dazu fügt man in /etc/apt/sources.list.d/backports.list folgendes ein:
 ```
 deb http://httpredir.debian.org/debian/ jessie-backports main
 ```
+Anschließend führt man noch folgendes aus:
+```
+# apt-get update
+```
 
 Wenn sys-V-init verwendet wird:
 ```
