@@ -69,6 +69,7 @@ Wenn systemd verwendet wird:
 fastd wird genutzt um ein VPN zwischen den Freifunk-Knoten und den Uplink-Servern aufzubauen
 
 fastd ist in debian jessie noch nicht verfügbar. Daher muss erst noch jessie-backports eingerichtet werden.
+Dazu fügt man in /etc/apt/sources.list.d/backports.list folgendes ein:
 ```
 deb http://httpredir.debian.org/debian/ jessie-backports main
 ```
