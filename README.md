@@ -86,7 +86,7 @@ Wenn sys-V-init verwendet wird:
 
 Wenn systemd verwendet wird:
 ```
-# systemctl fastd disable
+# systemctl disable fastd
 ```
 
 ### dnsmasq
