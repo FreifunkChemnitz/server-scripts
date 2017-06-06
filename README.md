@@ -112,14 +112,14 @@ Wenn sys-V-init verwendet wird:
 
 Wenn systemd verwendet wird:
 ```
-# systemctl openvpn disable
+# systemctl disable openvpn
 ```
 
 ## Freifunk Chemnitz Skripte einrichten
 ### Konfigurationsdateien anpassen
 
 ```
-cd /opt/freifunk/server-skripte/conf
+cd /opt/freifunk/server-skripts/conf
 cp bird.conf bird.local.conf
 cp dnsmasq.conf dnsmasq.local.conf
 cp general.conf general.local.conf
