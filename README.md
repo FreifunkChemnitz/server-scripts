@@ -121,6 +121,7 @@ Wenn systemd verwendet wird:
 ```
 cd /opt/freifunk/server-skripts/conf
 cp bird.conf bird.local.conf
+cp bird-routes.conf bird-routes.local.conf
 cp dnsmasq.conf dnsmasq.local.conf
 cp general.conf general.local.conf
 touch bird-routes.local.conf
