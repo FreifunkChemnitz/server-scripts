@@ -30,7 +30,7 @@ batman_setup_interface() {
 	done
 
 	# Freifunk Chemnitz server anycast
-	ip addr add fe80::ffc/64 dev bat0
+	#ip addr add fe80::ffc/64 dev bat0
 	
 	if [ "$USE_MESHVIEWER" != "1" ]; then
 		batman_wait_for_ll_address
