@@ -5,7 +5,7 @@
 ```
 # aptitude install git
 $ mkdir /opt/freifunk
-$ git clone https://github.com/FreifunkChemnitz/server-scripts.git /opt/freifunk/server-scripts
+$ git clone https://gitlab.com/FreifunkChemnitz/server-scripts.git /opt/freifunk/server-scripts
 ```
 
 ## Benötigte Software installieren
@@ -14,7 +14,7 @@ $ git clone https://github.com/FreifunkChemnitz/server-scripts.git /opt/freifunk
 B.A.T.M.A.N. wird als Routing-Protokoll im Mesh genutzt. Die Version aus den Debian Paketquellen ist deutlich veraltet und nicht mehr nutzbar für unser Mesh.
 
 Zuerst müssen die Abhängigkeiten für alfred batctl und batman_adv.
-Für x64 z.B.:
+Für x86_64 z.B.:
 ```
 # aptitude install build-essential linux-headers-amd64 pkg-config libnl-3-dev libnl-genl-3-dev libcap-dev
 ```
