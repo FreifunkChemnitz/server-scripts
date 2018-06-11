@@ -97,6 +97,24 @@ Der von uns genutzte DHCP Server und DNS Cache.
 # aptitude install dnsmasq-base
 ```
 
+### radvd
+
+Der von uns genutzte Service für IPv6 router advertisments. Dieser ist nur notwendig, wenn der Server ein IPv6-Gateway sein soll.
+
+```
+# aptitude install radvd
+```
+
+Wenn sys-V-init verwendet wird:
+```
+# update-rc.d radvd disable
+```
+
+Wenn systemd verwendet wird:
+```
+# systemctl disable radvd
+```
+
 ### OpenVPN
 
 OpenVPN wird genutzt, wenn sich mit dem VPN03 vom Freie Netze e.V. verbunden werden soll. Soll dies nicht gemacht werden, braucht man auch kein OpenVPN.
