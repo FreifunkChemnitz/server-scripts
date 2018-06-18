@@ -89,6 +89,17 @@ Wenn systemd verwendet wird:
 # systemctl disable fastd
 ```
 
+Nach der Installation muss ein Schlüsselpaar erzeugt werden per:
+```
+fastd --generate-key	
+```
+
+Der public Key kommt in die site.conf der Domäne in der der Server arbeiten soll.
+Der private Key wird in der datei fastd-secret.local.conf in folgender Form hinterlegt:
+```
+secret "000...fff";
+```
+
 ### dnsmasq
 
 Der von uns genutzte DHCP Server und DNS Cache.
