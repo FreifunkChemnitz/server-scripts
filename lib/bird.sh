@@ -6,7 +6,7 @@ bird_init() {
 	sed -e "s/__BIRD_ROUTER_ID__/169.254.${ipL1}.${ipL2}/g" \
 		-e "s/__BIRD_ROUTER_ASN__/${ipL1}${ipL2}/g" \
 		conf/bird.conf > conf/bird.local.conf
-	
+
 	echo -n "" > conf/bird-peers.local.conf
 	for p in "${GRE_PEERS[@]}"; do
 		local remoteHost=$(echo $p | awk -F ':' '{print $1}')
@@ -20,7 +20,7 @@ bird_init() {
 			log_error "Syntax error in peer definition: ${p}"
 		fi
 	done
-	
+
 	echo -n "" > conf/bird-routes.local.conf
 	for s in "${SERVICE_ADDRESSES[@]}"; do
 		if [ "$(bird_check_route "$s")" ]; then
@@ -33,7 +33,7 @@ bird_init() {
 	ip rule add from 10.149.0.0/16 lookup 100
 	ip rule add to 10.149.0.0/16 lookup 100
 	ip route add default via 127.0.0.1 table 100 metric 1024
-	
+
 	iptables -t nat -A POSTROUTING -o $WANIF -j MASQUERADE
 }
 
@@ -54,7 +54,7 @@ bird_stop() {
 
 bird_cron() {
 	if [ -n $WANGW -a -n $APIKEY ]; then
-		wget "http://api.routers.chemnitz.freifunk.net/request.php?apikey=$APIKEY&type=routing&region=$COUNTRY" -q -O conf/bird-routes.country.conf
+		wget "http://api.chemnitz.freifunk.net/request.php?region=$COUNTRY" -q -O conf/bird-routes.country.conf
 		sed -e "s/NEXTHOP/$WANGW/g" -i "conf/bird-routes.country.conf"
 		killall bird -s SIGHUP
 	fi
