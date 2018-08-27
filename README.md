@@ -5,7 +5,7 @@
 ```
 # aptitude install git
 $ mkdir /opt/freifunk
-$ git clone https://github.com/FreifunkChemnitz/server-scripts.git /opt/freifunk/server-scripts
+$ git clone https://gitlab.com/FreifunkChemnitz/server-scripts.git /opt/freifunk/server-scripts
 ```
 
 ## Benötigte Software installieren
@@ -14,7 +14,7 @@ $ git clone https://github.com/FreifunkChemnitz/server-scripts.git /opt/freifunk
 B.A.T.M.A.N. wird als Routing-Protokoll im Mesh genutzt. Die Version aus den Debian Paketquellen ist deutlich veraltet und nicht mehr nutzbar für unser Mesh.
 
 Zuerst müssen die Abhängigkeiten für alfred batctl und batman_adv.
-Für x64 z.B.:
+Für x86_64 z.B.:
 ```
 # aptitude install build-essential linux-headers-amd64 pkg-config libnl-3-dev libnl-genl-3-dev libcap-dev
 ```
@@ -89,12 +89,41 @@ Wenn systemd verwendet wird:
 # systemctl disable fastd
 ```
 
+Nach der Installation muss ein Schlüsselpaar erzeugt werden per:
+```
+fastd --generate-key	
+```
+
+Der public Key kommt in die site.conf der Domäne in der der Server arbeiten soll.
+Der private Key wird in der datei fastd-secret.local.conf in folgender Form hinterlegt:
+```
+secret "000...fff";
+```
+
 ### dnsmasq
 
 Der von uns genutzte DHCP Server und DNS Cache.
 
 ```
 # aptitude install dnsmasq-base
+```
+
+### radvd
+
+Der von uns genutzte Service für IPv6 router advertisments. Dieser ist nur notwendig, wenn der Server ein IPv6-Gateway sein soll.
+
+```
+# aptitude install radvd
+```
+
+Wenn sys-V-init verwendet wird:
+```
+# update-rc.d radvd disable
+```
+
+Wenn systemd verwendet wird:
+```
+# systemctl disable radvd
 ```
 
 ### OpenVPN
