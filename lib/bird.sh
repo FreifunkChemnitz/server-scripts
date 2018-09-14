@@ -53,7 +53,7 @@ bird_stop() {
 }
 
 bird_cron() {
-	if [ -n $WANGW -a -n $APIKEY ]; then
+	if [ -n $WANGW ]; then
 		wget "http://api.chemnitz.freifunk.net/request.php?region=$COUNTRY" -q -O conf/bird-routes.country.conf
 		sed -e "s/NEXTHOP/$WANGW/g" -i "conf/bird-routes.country.conf"
 		killall bird -s SIGHUP
