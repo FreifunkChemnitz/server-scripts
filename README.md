@@ -154,7 +154,6 @@ cp bird-routes.conf bird-routes.local.conf
 cp dnsmasq.conf dnsmasq.local.conf
 cp general.conf general.local.conf
 touch bird-routes.local.conf
-touch vpn03.local.key
 ```
 
 #### bird.local.conf
@@ -196,10 +195,6 @@ USE_MESHVIEWER="0"
 
 Im Umland ist `BATMAN_IFS` auf die für das Umland bestimmten Server zu ändern.
 
-
-#### vpn03.local.key
-
-Wenn der Server sich mit dem VPN03 vom Freie Netze e.V. verbinden soll, muss man sich einen Schlüssel unter https://wiki.freifunk.net/VPN03 organisieren und diesen als `vpn03.local.key` speichern.
 
 ### Skript aktivieren
 
