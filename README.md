@@ -126,24 +126,6 @@ Wenn systemd verwendet wird:
 # systemctl disable radvd
 ```
 
-### OpenVPN
-
-OpenVPN wird genutzt, wenn sich mit dem VPN03 vom Freie Netze e.V. verbunden werden soll. Soll dies nicht gemacht werden, braucht man auch kein OpenVPN.
-
-```
-# aptitude install openvpn
-```
-
-Wenn sys-V-init verwendet wird:
-```
-# update-rc.d openvpn disable
-```
-
-Wenn systemd verwendet wird:
-```
-# systemctl disable openvpn
-```
-
 ## Freifunk Chemnitz Skripte einrichten
 ### Konfigurationsdateien anpassen
 
@@ -183,7 +165,6 @@ USE_FASTD="1"
 USE_BIRD="1"
 USE_DNSMASQ="0"
 USE_RADVD="0"
-USE_VPN03="0"
 USE_MESHVIEWER="0"
 ```
 
