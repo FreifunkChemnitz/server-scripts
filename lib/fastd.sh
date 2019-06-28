@@ -7,7 +7,9 @@ fastd_init() {
 }
 
 fastd_start() {
-	fastd -d -c conf/fastd.conf
+	for ((i=0; i<$(nproc||echo -n 1); i++)); do
+		fastd -d -c conf/fastd.conf --bind any:$(expr 10000 + $i)
+        done
 }
 
 fastd_stop() {
