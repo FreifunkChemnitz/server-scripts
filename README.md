@@ -13,7 +13,7 @@ $ git clone https://gitlab.com/FreifunkChemnitz/server-scripts.git /opt/freifunk
 
 B.A.T.M.A.N. wird als Routing-Protokoll im Mesh genutzt. Die Version aus den Debian Paketquellen ist deutlich veraltet und nicht mehr nutzbar für unser Mesh.
 
-Zuerst müssen die Abhängigkeiten für alfred batctl und batman_adv.
+Zuerst müssen die Abhängigkeiten für alfred, batctl und batman_adv installiert werden.
 Für x86_64 z.B.:
 ```
 # aptitude install build-essential linux-headers-amd64 pkg-config libnl-3-dev libnl-genl-3-dev libcap-dev
@@ -94,8 +94,8 @@ Nach der Installation muss ein Schlüsselpaar erzeugt werden per:
 fastd --generate-key	
 ```
 
-Der public Key kommt in die site.conf der Domäne in der der Server arbeiten soll.
-Der private Key wird in der datei fastd-secret.local.conf in folgender Form hinterlegt:
+Der public Key kommt in die site.conf der Domäne, in welcher der Server arbeiten soll.
+Der private Key wird in der Datei fastd-secret.local.conf in folgender Form hinterlegt:
 ```
 secret "000...fff";
 ```
@@ -130,7 +130,7 @@ Wenn systemd verwendet wird:
 ### Konfigurationsdateien anpassen
 
 ```
-cd /opt/freifunk/server-skripts/conf
+cd /opt/freifunk/server-scripts/conf
 cp bird.conf bird.local.conf
 cp bird-routes.conf bird-routes.local.conf
 cp dnsmasq.conf dnsmasq.local.conf
