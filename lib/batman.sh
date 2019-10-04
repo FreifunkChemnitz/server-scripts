@@ -13,7 +13,6 @@ batman_init() {
 #	$1		Interface name
 batman_add_interface() {
 	batctl interface add $1
-	echo 1 > /sys/class/net/"$1"/batman_adv/no_rebroadcast
 }
 
 # Remove interface from batman-adv
