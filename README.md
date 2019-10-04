@@ -21,7 +21,7 @@ Für x86_64 z.B.:
 
 #### batman_adv
 ```
-$ git clone $URL
+$ git clone -b maint git://git.open-mesh.org/batman-adv.git
 $ cd path/to/batman
 $ make
 # make install
@@ -29,7 +29,7 @@ $ make
 
 #### batctl
 ```
-$ wget -O - $realeaseFromHomepage | tar xz
+$ git clone -b maint git://git.open-mesh.org/batctl.git
 $ cd batctl
 $ make
 # make install
@@ -37,7 +37,7 @@ $ make
 
 #### alfred
 ```
-$ wget -O - $releaseFromHomepage | tar xz
+$ git clone git://git.open-mesh.org/alfred.git
 $ cd alfred
 $ make
 # make install
