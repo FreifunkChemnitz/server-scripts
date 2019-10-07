@@ -5,6 +5,8 @@ bird_init() {
 	local ipL2=$(echo $WANIP | awk -F '.' '{print $4}')
 	sed -e "s/__BIRD_ROUTER_ID__/169.254.${ipL1}.${ipL2}/g" \
 		-e "s/__BIRD_ROUTER_ASN__/${ipL1}${ipL2}/g" \
+		-e "s/__WANIP__/${WANIP}/g" \
+		-e "s/__WANIF__/${WANIF}/g" \
 		conf/bird.conf > conf/bird.local.conf
 
 	echo -n "" > conf/bird-peers.local.conf
