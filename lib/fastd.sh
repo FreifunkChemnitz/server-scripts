@@ -8,7 +8,7 @@ fastd_init() {
 
 fastd_start() {
 	for ((i=0; i<$(nproc||echo -n 1); i++)); do
-		fastd -d -c conf/fastd.conf --bind any:$(expr 10000 + $i)
+		fastd -d -c conf/fastd.conf --bind any:$(expr 10000 + $i) --interface mesh-vpn$i
         done
 }
 
