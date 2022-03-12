@@ -3,16 +3,19 @@
 batman_init() {
 	modprobe batman-adv
 	modprobe dummy
+	batctl routing_algo BATMAN_V
 	batctl interface add dummy0
 	batctl bridge_loop_avoidance 1
 	batctl bonding 1
-	[ "$USE_DNSMASQ" = "1" ] && batctl gw_mode server
+	[ "$USE_DNSMASQ" = "1" ] && batctl gw_mode server 1000mbit/1000mbit
 }
 
 # Add interface to batman-adv
 #	$1		Interface name
 batman_add_interface() {
 	batctl interface add $1
+	echo 1 > /sys/class/net/"$1"/batman_adv/no_rebroadcast
+	echo 1000000 > /sys/class/net/"$1"/batman_adv/throughput_override
 }
 
 # Remove interface from batman-adv
