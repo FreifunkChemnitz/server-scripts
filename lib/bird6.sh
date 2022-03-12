@@ -9,7 +9,7 @@ bird6_init() {
 		-e "s/__BIRD_ROUTER_IP__/fe80::ffc:${ip6L1}:${ip6L2}/g" \
 		-e "s/__BIRD_ROUTER_ASN__/${ipL1}${ipL2}/g" \
 		conf/bird6.conf > conf/bird6.local.conf
-	
+
 	echo -n "" > conf/bird6-peers.local.conf
 	for p in "${GRE_PEERS[@]}"; do
 		local remoteHost=$(echo $p | awk -F ':' '{print $1}')
@@ -23,16 +23,18 @@ bird6_init() {
 			log_error "Syntax error in peer definition: ${p}"
 		fi
 	done
-	
+
 	echo -n "" > conf/bird6-routes.local.conf
 	for s in "${SERVICE_ADDRESSES[@]}"; do
 		if [ "$(bird6_check_route "$s")" ]; then
 			bird6_add_route "$s"
 		fi
 	done
-	
+
 	ip -6 rule add from 2001:bc8:3f13:ffc2::/64 lookup 100
 	ip -6 rule add to 2001:bc8:3f13:ffc2::/64 lookup 100
+	ip -6 rule add from 2001:bc8:3f13:ffc3::/64 lookup 100
+	ip -6 rule add to 2001:bc8:3f13:ffc3::/64 lookup 100
 }
 
 # Check for route
