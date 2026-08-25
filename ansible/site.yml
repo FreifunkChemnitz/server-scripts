@@ -1,0 +1,6 @@
+---
+- name: Configure Freifunk Chemnitz GRE backbone tunnels
+  hosts: ffc_servers
+  become: true
+  roles:
+    - gre_tunnels

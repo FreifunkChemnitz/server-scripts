@@ -1,0 +1,11 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description=Run the Freifunk Chemnitz GRE tunnel watchdog periodically
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec={{ gre_watchdog_interval }}
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target

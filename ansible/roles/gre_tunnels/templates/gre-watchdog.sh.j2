@@ -1,0 +1,32 @@
+#!/bin/bash
+# {{ ansible_managed }}
+#
+# Checks every gre-* interface for reachability by pinging the all-routers
+# multicast address and looking for duplicate replies from the remote end.
+# Equivalent to gre_cron()/gre_check_tunnel() in lib/gre.sh.
+
+set -u
+
+mail_to="{{ gre_watchdog_mail_to }}"
+
+log_msg() {
+	logger "[FFC] $(date '+%Y-%m-%d %H:%M:%S') $1"
+}
+
+log_alert() {
+	log_msg "$1"
+	if [ -n "$mail_to" ]; then
+		mail -s "[FFC] Server Alert - $(hostname -f)" "$mail_to" <<-EOF
+		$(date '+%Y-%m-%d %H:%M:%S')
+
+		$1
+		EOF
+	fi
+}
+
+for iface in $(ls /sys/class/net | grep '^gre-'); do
+	dup_count=$(ping6 -c5 -i1 "ff02::2%${iface}" 2>/dev/null | grep -c DUP)
+	if [ "$dup_count" -eq 0 ]; then
+		log_alert "GRE tunnel seems down: $iface"
+	fi
+done
