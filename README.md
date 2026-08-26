@@ -1,5 +1,10 @@
 # server-scripts
 
+## Dokumentation
+
+Eine Übersicht über die Architektur des Repositories sowie eine Erklärung, wie das
+Freifunk-Backbone auf Netzwerkebene funktioniert, findet sich unter [`docs/`](docs/README.md).
+
 ## Skripte installieren
 
 ```
