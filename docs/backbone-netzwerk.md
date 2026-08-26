@@ -177,6 +177,11 @@ BGP-Router:
    Erreichbarkeit im Mesh selbst.
 
 Diese Trennung — **Transport** (GRE/fastd) → **ein flaches [Layer-2](#grundlagen-was-ist-ein-layer-2-netz)-Mesh** (batman-adv) →
-**L3-Routing zwischen Servern** (BGP/BIRD) — ist das Kernprinzip, nach dem praktisch alle
-Freifunk-Communities ihre Backbones aufbauen, und erklärt, warum die Module in `lib/`
-in dieser Reihenfolge initialisiert werden (siehe [Architektur](architektur.md)).
+**L3-Routing zwischen Servern** (BGP/BIRD) — ist ein im Freifunk-Umfeld verbreitetes
+Architekturprinzip. Auch andere Communities verbinden ihre Gateway-/Supernodes über
+GRE-Tunnel und tauschen Routen per BGP (BIRD) aus, etwa Freifunk Köln/Bonn; andere, z. B.
+Freifunk Rheinland, nutzen für die Transport- und Routingebene zwischen den Supernodes
+stattdessen tinc-VPN mit OSPF. Das grundsätzliche Muster — Zugangs-VPN zu Gateways, ein
+gemeinsames Mesh, darüberliegendes L3-Routing — ist aber vergleichbar und erklärt, warum
+die Module in `lib/` in dieser Reihenfolge initialisiert werden (siehe
+[Architektur](architektur.md)).

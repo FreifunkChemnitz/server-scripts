@@ -16,9 +16,10 @@ Mesh-Routing-Protokoll auf [Schicht 2](backbone-netzwerk.md#grundlagen-was-ist-e
 Es bildet das eigentliche Freifunk-Mesh: Alle GRE-Tunnel zu anderen Servern und alle
 fastd-Verbindungen zu Freifunk-Routern werden als Slave-Interfaces in eine gemeinsame
 batman-adv-Instanz (`bat0`) gehängt. batman-adv übernimmt Pfadwahl, Redundanz und
-Schleifenvermeidung, ohne dass Teilnehmer sich gegenseitig kennen müssen. Die Version aus
-den Debian-Paketquellen ist zu alt, daher wird sie aus dem offiziellen `open-mesh.org`-Repo
-selbst gebaut.
+Schleifenvermeidung: Jeder Knoten flutet periodisch sogenannte Originator-Nachrichten
+(OGMs) und muss dabei nur den jeweils besten nächsten Hop pro Ziel kennen, nicht die
+komplette Netz-Topologie. Die Version aus den Debian-Paketquellen ist zu alt, daher wird
+sie aus dem offiziellen `open-mesh.org`-Repo selbst gebaut.
 
 ### alfred / batadv-vis
 
@@ -48,7 +49,10 @@ Backbone-Servern über das öffentliche Internet. Konfiguriert über `lib/gre.sh
 
 ### BIRD / BIRD6
 
-Zwei Instanzen desselben Routing-Daemons, eine für IPv4 (`bird`), eine für IPv6 (`bird6`).
+Zwei getrennte Daemon-Binaries aus derselben BIRD-1.x-Codebasis: `bird` für IPv4, `bird6`
+für IPv6 (BIRD 2.x hat diese Aufteilung später zu einem einzigen Binary zusammengeführt;
+dieses Repository nutzt noch die klassische 1.x-Aufteilung, erkennbar an den getrennten
+`lib/bird.sh`/`lib/bird6.sh`-Modulen und `bird.conf`/`bird6.conf`-Dateien).
 Jeder Server betreibt darüber eine eigene BGP-Instanz und baut zu jedem GRE-Peer eine
 interne BGP-Session auf. So lernen sich die Server gegenseitig Routen (eigene IP, Mesh-Netz,
 Service-Adressen, Internet-Default-Route) und ermöglichen serverübergreifendes,
