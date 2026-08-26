@@ -179,9 +179,19 @@ BGP-Router:
 Diese Trennung — **Transport** (GRE/fastd) → **ein flaches [Layer-2](#grundlagen-was-ist-ein-layer-2-netz)-Mesh** (batman-adv) →
 **L3-Routing zwischen Servern** (BGP/BIRD) — ist ein im Freifunk-Umfeld verbreitetes
 Architekturprinzip. Auch andere Communities verbinden ihre Gateway-/Supernodes über
-GRE-Tunnel und tauschen Routen per BGP (BIRD) aus, etwa Freifunk Köln/Bonn; andere, z. B.
-Freifunk Rheinland, nutzen für die Transport- und Routingebene zwischen den Supernodes
-stattdessen tinc-VPN mit OSPF. Das grundsätzliche Muster — Zugangs-VPN zu Gateways, ein
-gemeinsames Mesh, darüberliegendes L3-Routing — ist aber vergleichbar und erklärt, warum
-die Module in `lib/` in dieser Reihenfolge initialisiert werden (siehe
-[Architektur](architektur.md)).
+GRE-Tunnel und tauschen Routen per BGP (BIRD) aus, etwa
+[Freifunk Köln/Bonn](https://kbu.freifunk.net/wiki/index.php?title=Architektur); andere, z. B.
+[Freifunk Rheinland](https://wiki.freifunk-rheinland.net/wiki/Backbone), nutzen für die
+Transport- und Routingebene zwischen den Supernodes stattdessen tinc-VPN mit OSPF (siehe
+auch [Netzwerk/Super-Node Backbone Anbindung](https://wiki.freifunk-rheinland.net/wiki/Netzwerk/Super-Node_Backbone_Anbindung)).
+Das grundsätzliche Muster — Zugangs-VPN zu Gateways, ein gemeinsames Mesh, darüberliegendes
+L3-Routing — ist aber vergleichbar und erklärt, warum die Module in `lib/` in dieser
+Reihenfolge initialisiert werden (siehe [Architektur](architektur.md)).
+
+## Quellen
+
+- [batman-adv — The Linux Kernel documentation](https://docs.kernel.org/networking/batman-adv.html)
+- [How to Configure a GRETAP Tunnel for Layer 2 Bridging](https://oneuptime.com/blog/post/2026-03-20-gretap-tunnel-layer2-bridging/view)
+- [Architektur – Freifunk Köln, Bonn und Umgebung](https://kbu.freifunk.net/wiki/index.php?title=Architektur)
+- [Backbone – Freifunk Rheinland e.V.](https://wiki.freifunk-rheinland.net/wiki/Backbone)
+- [Netzwerk/Super-Node Backbone Anbindung – Freifunk Rheinland e.V.](https://wiki.freifunk-rheinland.net/wiki/Netzwerk/Super-Node_Backbone_Anbindung)

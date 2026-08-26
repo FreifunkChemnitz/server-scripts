@@ -20,6 +20,8 @@ Schleifenvermeidung: Jeder Knoten flutet periodisch sogenannte Originator-Nachri
 (OGMs) und muss dabei nur den jeweils besten nächsten Hop pro Ziel kennen, nicht die
 komplette Netz-Topologie. Die Version aus den Debian-Paketquellen ist zu alt, daher wird
 sie aus dem offiziellen `open-mesh.org`-Repo selbst gebaut.
+([Kernel-Doku](https://docs.kernel.org/networking/batman-adv.html),
+[Wikipedia](https://en.wikipedia.org/wiki/B.A.T.M.A.N.))
 
 ### alfred / batadv-vis
 
@@ -27,6 +29,7 @@ Zusatzwerkzeuge aus demselben `open-mesh`-Projekt. `alfred` verteilt beliebige
 Metadaten (z. B. Knotennamen, Standort) im Mesh, `batadv-vis` exportiert die
 Mesh-Topologie. Beides zusammen liefert die Rohdaten für die Freifunk-Kartendarstellung
 (Meshviewer). Gestartet über `lib/batman.sh` bzw. `lib/meshviewer.sh`.
+([open-mesh.org-Doku](https://www.open-mesh.org/doc/alfred/))
 
 ### fastd
 
@@ -36,6 +39,7 @@ bauen darüber eine verschlüsselte Verbindung zum Server auf; jede neue Verbind
 Aufbau automatisch per `batctl interface add` in batman-adv eingehängt (siehe `on up`-Hook in
 `conf/fastd.conf`). Damit ist fastd der Zugangspunkt der Endgeräte zum Mesh. Gesteuert über
 `lib/fastd.sh`, ein Prozess pro CPU-Kern für bessere Lastverteilung.
+([fastd-Doku](https://fastd.readthedocs.io/))
 
 ### GRE / `gretap` (Kernel-Feature, `iproute2`)
 
@@ -46,6 +50,7 @@ direkt in batman-adv einhängen. Ergebnis: Ein
 [vollvermaschtes](backbone-netzwerk.md#grundlagen-was-ist-eine-vollvermaschung)
 [Layer-2-Netz](backbone-netzwerk.md#grundlagen-was-ist-ein-layer-2-netz) zwischen allen
 Backbone-Servern über das öffentliche Internet. Konfiguriert über `lib/gre.sh`.
+([Red Hat Developer: Linux-Tunnel-Interfaces](https://developers.redhat.com/blog/2019/05/17/an-introduction-to-linux-virtual-interfaces-tunnels))
 
 ### BIRD / BIRD6
 
@@ -59,6 +64,7 @@ Service-Adressen, Internet-Default-Route) und ermöglichen serverübergreifendes
 ausfallsicheres Routing zusätzlich zur reinen
 [Layer-2](backbone-netzwerk.md#grundlagen-was-ist-ein-layer-2-netz)-Erreichbarkeit von batman-adv.
 Konfiguriert über `lib/bird.sh`/`lib/bird6.sh`, nur aktiv wenn `USE_BIRD=1`.
+([Ankündigung der Zusammenführung in BIRD 2](https://bird.network.cz/pipermail/bird-users/2011-August/002341.html))
 
 ### dnsmasq
 
@@ -101,3 +107,14 @@ aktiv (`USE_RADVD=1`, erfordert `USE_BIRD=1`), gesteuert über `lib/radvd.sh`.
 | `dnsmasq.conf` | Template für DHCP-Range, DNS-Domäne und Gateway-Optionen im Mesh. |
 | `radvd.conf` | Router-Advertisement-Konfiguration für die beiden IPv6-Mesh-Präfixe. |
 | `sysctl.conf` | Kernel-Netzwerkparameter (IP-Forwarding, rp_filter, Connection-Tracking-Limits), die beim Start angewendet werden. |
+
+## Quellen
+
+- [batman-adv — The Linux Kernel documentation](https://docs.kernel.org/networking/batman-adv.html)
+- [B.A.T.M.A.N. — Wikipedia](https://en.wikipedia.org/wiki/B.A.T.M.A.N.)
+- [Batman-adv Bridge Loop Avoidance — open-mesh.org](https://www.open-mesh.org/doc/batman-adv/Bridge-loop-avoidance.html)
+- [A.L.F.R.E.D. — open-mesh.org](https://www.open-mesh.org/doc/alfred/)
+- [fastd Documentation](https://fastd.readthedocs.io/)
+- [An introduction to Linux virtual interfaces: Tunnels — Red Hat Developer](https://developers.redhat.com/blog/2019/05/17/an-introduction-to-linux-virtual-interfaces-tunnels)
+- [Merging bird and bird6 — bird-users Mailingliste](https://bird.network.cz/pipermail/bird-users/2011-August/002341.html)
+- [BIRD2 BGP Configuration on a Linux VPS](https://www.virtua.cloud/learn/en/tutorials/bird2-bgp-configuration-linux-vps)
