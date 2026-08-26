@@ -105,7 +105,9 @@ flowchart TB
   Client-Interface wird beim Verbindungsaufbau automatisch per `batctl interface add`
   in batman-adv eingehängt (siehe `on up`-Hook in `conf/fastd.conf`).
 - Damit transportieren sowohl GRE- als auch fastd-Tunnel **Ethernet-Frames über das
-  Internet** — beide sind reine Transportstrecken für die nächste Ebene.
+  Internet** — beide sind reine Transportstrecken für die nächste Ebene. Welche der beiden
+  Strecken verschlüsselt ist und welche nicht, beschreibt das
+  [Sicherheitsmodell](sicherheitsmodell.md).
 
 ### 2. Ebene 2: Ein einziges großes Mesh über batman-adv
 

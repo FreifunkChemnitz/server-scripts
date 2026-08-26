@@ -70,7 +70,8 @@ Konfiguriert über `lib/bird.sh`/`lib/bird6.sh`, nur aktiv wenn `USE_BIRD=1`.
 
 DHCP-Server und DNS-Cache für Endgeräte im Mesh. Vergibt IPv4-Adressen aus
 `10.149.0.0/16` an Clients auf `bat0` und dient als DNS-Resolver für die Domäne
-`ffcmesh`. Nur auf ausgewählten Gateway-Servern aktiv (`USE_DNSMASQ=1`), gesteuert über
+`ffcmesh` (Details zu den genauen Adressbereichen im [IP-Adressplan](ip-adressplan.md)).
+Nur auf ausgewählten Gateway-Servern aktiv (`USE_DNSMASQ=1`), gesteuert über
 `lib/dnsmasq.sh`.
 
 ### radvd
