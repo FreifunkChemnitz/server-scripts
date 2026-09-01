@@ -12,7 +12,9 @@ Die Peer-Liste `GRE_PEERS` ist eine **statische, pro Server gepflegte** Liste in
 Das ist die häufigste Fehlerquelle beim Hinzufügen eines neuen Servers:
 
 1. Öffentliche IPv4 (`WANIP`) des neuen Servers festlegen und dessen
-   `general.local.conf`, `bird.local.conf` etc. wie in der README beschrieben einrichten.
+   `general.local.conf` wie in der README beschrieben einrichten. Die BIRD-Konfiguration
+   erzeugt das Ansible-Playbook [ffc-mash](https://github.com/FreifunkChemnitz/ffc-mash)
+   aus der Inventory-Gruppe `routers`.
 2. Den neuen Server **auf jedem bereits bestehenden Backbone-Server** in dessen
    `GRE_PEERS` (und ggf. `BATMAN_IFS`, siehe [IP-Adressplan](ip-adressplan.md#regionen-chemnitz-und-umland))
    eintragen — nicht nur in der Konfiguration des neuen Servers selbst.
@@ -71,8 +73,10 @@ Vorgehen bei einer solchen Meldung:
 - `dnsmasq_cron`, `radvd_cron` (jede Minute): starten den jeweiligen Dienst still neu,
   falls er nicht läuft — ohne Logging oder Mail, auch bei Erfolg oder Misserfolg.
 
-BIRD hat keine `*_cron`-Funktion mehr: die Ausnahme-/Regionalrouten werden beim Setup aus
-`conf/routes/` gerendert, nicht mehr zur Laufzeit nachgeladen (Issue #7).
+BIRD hat keine `*_cron`-Funktion mehr: die Ausnahme-/Regionalrouten werden vom
+Ansible-Playbook [ffc-mash](https://github.com/FreifunkChemnitz/ffc-mash) beim Deploy
+gerendert (`ffc_vpn_gateway`, `files/bird-routes/`), nicht mehr zur Laufzeit nachgeladen
+(Issue #7).
 
 Eine Watchdog-Mail bedeutet also praktisch immer: ein GRE-Tunnel ist (vermeintlich)
 ausgefallen.

@@ -14,8 +14,7 @@ und per Cron überwacht werden.
 | `ffc-server.sh` | Zentrales Steuerskript: `start`, `stop`, `watchdog`. Lädt Konfiguration und alle `lib/*.sh`-Module. |
 | `initd-ffc.sh` | Dünner Wrapper, der `ffc-server.sh` als `/etc/init.d/ffc` einbindet (SysV-Init). |
 | `lib/*.sh` | Ein Modul pro Dienst/Funktion (siehe unten). Jedes Modul stellt `<name>_init`, `<name>_start`, `<name>_stop` und optional `<name>_cron` bereit. |
-| `conf/*.conf` | Eingecheckte Vorlagen/Defaults. Pro Server werden daraus `*.local.conf`-Dateien erzeugt bzw. von Hand angelegt (siehe `conf/.gitignore`: `*.local.*` und `bird-routes.country.conf` sind lokal/generiert und nicht versioniert). |
-| `conf/routes/*.conf` | Statisch gepflegte BIRD-Ausnahme-/Länderrouten (`_global.conf` + `<COUNTRY>.conf`), die `bird_init` zu `conf/bird-routes.country.conf` rendert. |
+| `conf/*.conf` | Eingecheckte Vorlagen/Defaults. Pro Server werden daraus `*.local.conf`-Dateien erzeugt bzw. von Hand angelegt (siehe `conf/.gitignore`: `*.local.*` ist lokal/generiert und nicht versioniert). Die BIRD-Konfiguration liegt **nicht** mehr hier, sondern im Ansible-Playbook [ffc-mash](https://github.com/FreifunkChemnitz/ffc-mash) (Rolle `ffc_vpn_gateway`, Ziel `/etc/bird/`). |
 
 ## Die Module in `lib/`
 
@@ -28,9 +27,9 @@ ihrem Zweck findet sich in [Komponenten](komponenten.md).
 | `gre.sh` | Aufbau der GRE-Tunnel (`gretap`) zu allen anderen Backbone-Servern aus `GRE_PEERS`; Watchdog-Check per ICMPv6-Ping auf die Tunnel-Interfaces. |
 | `batman.sh` | Initialisiert `batman-adv`, hängt die GRE-Interfaces (aus `BATMAN_IFS`) und später `fastd`-Interfaces als Slaves ein, konfiguriert `bat0` (Service-Adressen, Bridge-Loop-Avoidance, Bonding, Gateway-Modus) und startet `alfred`/`batadv-vis` für die Meshviewer-Daten. |
 | `fastd.sh` | Startet das fastd-VPN (einen Prozess pro CPU-Kern, jeweils auf eigenem Port), über das sich Freifunk-Router mit dem Server verbinden. |
-| `bird.sh` / `bird6.sh` | Generieren die BIRD-/BIRD6-Konfiguration aus Templates (`conf/bird*.conf`), tragen alle GRE-Peers als BGP-Nachbarn ein, setzen Policy-Routing (`ip rule`/`ip -6 rule`) für das Mesh-Netz und starten die Routing-Daemons. |
+| `bird.sh` / `bird6.sh` | Setzen das Policy-Routing (`ip rule`/`ip -6 rule` → Tabelle 100) und NAT für das Mesh-Netz und starten/stoppen die `bird`/`bird6`-Dienste (via systemd). Die BIRD-Konfiguration selbst (Router-ID, BGP-Peers, Routen) wird vom Ansible-Playbook [ffc-mash](https://github.com/FreifunkChemnitz/ffc-mash) (Rolle `ffc_vpn_gateway`) nach `/etc/bird/` gerendert. |
 | `dnsmasq.sh` | DHCP/DNS für Endgeräte im Mesh (`bat0`), optional, nur auf Servern mit `USE_DNSMASQ=1`. |
-| `radvd.sh` | IPv6 Router Advertisements für `bat0`, nur auf IPv6-Gateway-Servern (`USE_RADVD=1`), setzt zusätzlich eine Default-Route in BIRD6. |
+| `radvd.sh` | IPv6 Router Advertisements für `bat0`, nur auf IPv6-Gateway-Servern (`USE_RADVD=1`). Die zugehörige IPv6-Default-Route in BIRD6 kommt aus der Ansible-Rolle (`ffc_vpn_gateway_bird_ipv6_uplink`). |
 | `meshviewer.sh` | Startet `alfred`/`batadv-vis` unabhängig von `batman.sh`, falls der Server primär als Meshviewer-Datenquelle dient. |
 
 ## Ablauf: Start, Stop, Watchdog
@@ -74,27 +73,27 @@ Wichtige Details zum Ablauf:
 - **Watchdog:** `ffc-server.sh watchdog` wird minütlich per Cron aufgerufen (siehe README).
   Jede Minute werden laufende Prozesse (dnsmasq, radvd, alfred) geprüft und bei Bedarf neu
   gestartet; alle 5 Minuten wird zusätzlich die Erreichbarkeit der GRE-Tunnel per Ping
-  geprüft und die länderspezifische Routen-Datei von der Freifunk-Chemnitz-API neu geladen.
-  Fehler werden über `log_error`/`log_fatal_error` sowohl nach syslog als auch (im
+  geprüft. Fehler werden über `log_error`/`log_fatal_error` sowohl nach syslog als auch (im
   Watchdog-Kontext) per Mail an `LOG_TO` gemeldet.
-- **Konfigurations-Templating:** `bird.sh`, `bird6.sh` und `dnsmasq.sh` erzeugen aus den
-  eingecheckten `conf/*.conf`-Vorlagen (Platzhalter wie `__BIRD_ROUTER_ID__`,
-  `__DNSMASQ_SERVICE_IP__`) bei jedem Start neue `*.local.conf`-Dateien anhand der Werte aus
-  `general.local.conf` — die eingecheckten Vorlagen sind also keine fertigen Configs,
-  sondern Templates.
+- **Konfigurations-Templating:** `dnsmasq.sh` erzeugt aus der eingecheckten
+  `conf/dnsmasq.conf`-Vorlage (Platzhalter wie `__DNSMASQ_SERVICE_IP__`) bei jedem Start
+  eine `*.local.conf`-Datei anhand der Werte aus `general.local.conf`. Die
+  BIRD-/BIRD6-Konfiguration wird dagegen vom Ansible-Playbook
+  [ffc-mash](https://github.com/FreifunkChemnitz/ffc-mash) gerendert (Rolle
+  `ffc_vpn_gateway` → `/etc/bird/`), nicht mehr zur Laufzeit hier.
 
 ## Kopplung zwischen den Modulen
 
 Die Module sind nicht unabhängig, sondern bauen aufeinander auf:
 
-- `bird.sh`/`bird6.sh` iterieren über dieselbe `GRE_PEERS`-Liste wie `gre.sh`, um pro
-  GRE-Tunnel eine BGP-Session zum jeweiligen Nachbarserver zu konfigurieren.
+- Die Ansible-Rolle `ffc_vpn_gateway` leitet die BGP-Peers aus derselben Server-Menge
+  (Inventory-Gruppe `routers`) ab wie die GRE-Vollvermaschung, sodass pro GRE-Tunnel eine
+  BGP-Session zum jeweiligen Nachbarserver besteht. `bird.sh`/`bird6.sh` selbst richten nur
+  das Policy-Routing (Tabelle 100) ein.
 - `batman.sh` bindet die von `gre.sh` erzeugten Interfaces (`BATMAN_IFS`) sowie die von
   `fastd.sh` erzeugten Client-Tunnel in dieselbe batman-adv-Instanz (`bat0`) ein.
-- `radvd.sh` erfordert `USE_BIRD=1` und trägt seine Default-Route direkt in BIRD6 ein
-  (`bird6_add_route`).
-- `dnsmasq.sh` und die BGP-Konfiguration nutzen dieselben `SERVICE_ADDRESSES` (die
-  Dnsmasq-Gateway-Adresse wird zugleich als Route über BIRD announced).
+- `radvd.sh` erfordert `USE_BIRD=1`; die zugehörige IPv6-Default-Route in BIRD6 wird über
+  die Ansible-Rolle gesetzt (`ffc_vpn_gateway_bird_ipv6_uplink`).
 
 Das Zusammenspiel dieser Module ergibt das eigentliche Backbone-Netz — siehe
 [Backbone-Netzwerk](backbone-netzwerk.md) für die konzeptionelle Erklärung.
