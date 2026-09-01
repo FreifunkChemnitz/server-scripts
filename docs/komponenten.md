@@ -56,14 +56,17 @@ Backbone-Servern über das öffentliche Internet. Konfiguriert über `lib/gre.sh
 
 Zwei getrennte Daemon-Binaries aus derselben BIRD-1.x-Codebasis: `bird` für IPv4, `bird6`
 für IPv6 (BIRD 2.x hat diese Aufteilung später zu einem einzigen Binary zusammengeführt;
-dieses Repository nutzt noch die klassische 1.x-Aufteilung, erkennbar an den getrennten
-`lib/bird.sh`/`lib/bird6.sh`-Modulen und `bird.conf`/`bird6.conf`-Dateien).
+das Setup nutzt noch die klassische 1.x-Aufteilung mit `/etc/bird/bird.conf` und
+`/etc/bird/bird6.conf`).
 Jeder Server betreibt darüber eine eigene BGP-Instanz und baut zu jedem GRE-Peer eine
 interne BGP-Session auf. So lernen sich die Server gegenseitig Routen (eigene IP, Mesh-Netz,
 Service-Adressen, Internet-Default-Route) und ermöglichen serverübergreifendes,
 ausfallsicheres Routing zusätzlich zur reinen
 [Layer-2](backbone-netzwerk.md#grundlagen-was-ist-ein-layer-2-netz)-Erreichbarkeit von batman-adv.
-Konfiguriert über `lib/bird.sh`/`lib/bird6.sh`, nur aktiv wenn `USE_BIRD=1`.
+Die BIRD-Konfiguration und die `bird`/`bird6`-Dienste werden vom Ansible-Playbook
+[ffc-mash](https://github.com/FreifunkChemnitz/ffc-mash) verwaltet (Rolle
+`ffc_vpn_gateway`); `lib/bird.sh`/`lib/bird6.sh` richten nur noch Policy-Routing
+(Tabelle 100) und NAT ein, nur aktiv wenn `USE_BIRD=1`.
 ([Ankündigung der Zusammenführung in BIRD 2](https://bird.network.cz/pipermail/bird-users/2011-August/002341.html))
 
 ### dnsmasq
@@ -79,7 +82,9 @@ Nur auf ausgewählten Gateway-Servern aktiv (`USE_DNSMASQ=1`), gesteuert über
 Router-Advertisement-Daemon für IPv6. Kündigt auf `bat0` die IPv6-Präfixe
 (`2001:bc8:3f13:ffc2::/64`, `ffc3::/64`) sowie DNS-Server per SLAAC an, sodass sich
 Mesh-Clients selbst eine IPv6-Adresse konfigurieren können. Nur auf IPv6-Gateway-Servern
-aktiv (`USE_RADVD=1`, erfordert `USE_BIRD=1`), gesteuert über `lib/radvd.sh`.
+aktiv (`USE_RADVD=1`, erfordert `USE_BIRD=1`), gesteuert über `lib/radvd.sh`. Die
+zugehörige IPv6-Default-Route in BIRD6 wird über die Ansible-Rolle gesetzt
+(`ffc_vpn_gateway_bird_ipv6_uplink`).
 
 ## Eigene Skripte (dieses Repository)
 
@@ -91,20 +96,16 @@ aktiv (`USE_RADVD=1`, erfordert `USE_BIRD=1`), gesteuert über `lib/radvd.sh`.
 | `lib/gre.sh` | Baut die GRE-Tunnel zu allen in `GRE_PEERS` gelisteten Servern auf/ab und prüft im Watchdog per ICMPv6-Ping, ob sie noch erreichbar sind. |
 | `lib/batman.sh` | Initialisiert batman-adv, hängt GRE- und fastd-Interfaces ein, konfiguriert `bat0` (Service-Adressen, Bridge-Loop-Avoidance, Bonding) und startet `alfred`/`batadv-vis`. |
 | `lib/fastd.sh` | Startet/stoppt die fastd-Prozesse für den Client-Zugang. |
-| `lib/bird.sh` / `lib/bird6.sh` | Generieren die BIRD-/BIRD6-Konfiguration aus den Templates in `conf/`, tragen BGP-Peers und Routen ein, richten Policy-Routing (Tabelle 100) und NAT ein. `bird_init` rendert zusätzlich die statischen Ausnahmerouten aus `conf/routes/` nach `conf/bird-routes.country.conf`. |
+| `lib/bird.sh` / `lib/bird6.sh` | Richten das Policy-Routing (Tabelle 100) und NAT für das Mesh-Netz ein und starten/stoppen die `bird`/`bird6`-Dienste (systemd). Die BIRD-Konfiguration selbst (Router-ID, BGP-Peers, Routen, Länderrouten) kommt aus dem Ansible-Playbook [ffc-mash](https://github.com/FreifunkChemnitz/ffc-mash) (Rolle `ffc_vpn_gateway`, `/etc/bird/`). |
 | `lib/dnsmasq.sh` | Generiert die dnsmasq-Konfiguration und startet/überwacht den Dienst. |
-| `lib/radvd.sh` | Startet/überwacht radvd und trägt die IPv6-Default-Route in BIRD6 ein. |
+| `lib/radvd.sh` | Startet/überwacht radvd. |
 | `lib/meshviewer.sh` | Startet `alfred`/`batadv-vis` eigenständig, falls der Server unabhängig von `lib/batman.sh` primär als Meshviewer-Datenquelle dienen soll. |
 
 ## Konfigurationsdateien (`conf/`)
 
 | Datei | Zweck |
 |---|---|
-| `general.conf` (+ `general.local.conf`) | Zentrale Server-Konfiguration: Netzwerk-Interface/IP, Feature-Flags (`USE_*`), GRE-Peer-Liste, `COUNTRY`/`WANGW` für die Ausnahmerouten. Die `.local.conf`-Variante enthält die serverspezifischen, nicht versionierten Werte. |
-| `routes/*.conf` | Statisch gepflegte BIRD-Ausnahme-/Länderrouten: `_global.conf` (überall) + `<COUNTRY>.conf` (pro Land), Platzhalter `NEXTHOP`. Siehe `conf/routes/README.md`. |
-| `bird.conf`, `bird6.conf` | Templates für die BIRD-/BIRD6-Hauptkonfiguration inkl. Policy-Routing-Tabelle `ffc`. |
-| `bird-peers.conf` | Template für eine einzelne BGP-Peer-Definition, wird pro GRE-Peer in `bird-peers.local.conf`/`bird6-peers.local.conf` dupliziert. |
-| `bird-routes.conf` | Template für eine einzelne statische Route, wird pro Service-Adresse dupliziert. |
+| `general.conf` (+ `general.local.conf`) | Zentrale Server-Konfiguration: Netzwerk-Interface/IP, Feature-Flags (`USE_*`), GRE-Peer-Liste. Die `.local.conf`-Variante enthält die serverspezifischen, nicht versionierten Werte. |
 | `fastd.conf` | fastd-Konfiguration inkl. der Hooks, die neue Client-Interfaces automatisch in batman-adv einhängen. |
 | `dnsmasq.conf` | Template für DHCP-Range, DNS-Domäne und Gateway-Optionen im Mesh. |
 | `radvd.conf` | Router-Advertisement-Konfiguration für die beiden IPv6-Mesh-Präfixe. |

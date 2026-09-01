@@ -30,8 +30,8 @@ aufbaut.
 
 Die GRE/`gretap`-Tunnel aus `lib/gre.sh` bieten **keine** eingebaute Verschlüsselung oder
 Authentifizierung — GRE kapselt Frames lediglich, ohne sie kryptografisch zu schützen.
-Ebenso enthält `conf/bird-peers.conf` keine BGP-Session-Authentifizierung (z. B. ein
-MD5-Passwort). Wer Zugriff auf den Netzwerkpfad zwischen zwei Backbone-Servern im
+Ebenso enthält die (per Ansible erzeugte) BIRD-BGP-Konfiguration keine
+Session-Authentifizierung (z. B. ein MD5-Passwort). Wer Zugriff auf den Netzwerkpfad zwischen zwei Backbone-Servern im
 Internet bekommt, kann den GRE- und BGP-Verkehr zwischen ihnen technisch mitlesen oder
 manipulieren.
 
@@ -44,8 +44,10 @@ Konfiguration, keine im Repository dokumentierte Policy-Aussage.
 
 ## BIRD-Ausnahmerouten: statisch statt Laufzeit-Fetch
 
-Die Ausnahme-/Länderrouten für BIRD (`conf/routes/`, gerendert nach
-`conf/bird-routes.country.conf`) werden im Repo gepflegt und beim Setup gerendert.
+Die Ausnahme-/Länderrouten für BIRD werden im Ansible-Playbook
+[ffc-mash](https://github.com/FreifunkChemnitz/ffc-mash)
+(`roles/custom/ffc_vpn_gateway/files/bird-routes/`) gepflegt und beim Deploy nach
+`/etc/bird/bird-routes.country.conf` gerendert.
 Früher lud `bird_cron` sie alle 5 Minuten per **unverschlüsseltem `http://`** von
 `api.chemnitz.freifunk.net` nach und ließ BIRD per `SIGHUP` neu laden — ein On-Path-Angreifer
 hätte darüber statische Routen in die Routingtabelle der Gateways injizieren können
@@ -57,7 +59,7 @@ hätte darüber statische Routen in die Routingtabelle der Gateways injizieren k
 |---|---|---|
 | Freifunk-Router ↔ Server (fastd) | Ja (`salsa2012+umac`) | Nein (`on verify "true"`, jeder mit Schlüsselpaar) |
 | Backbone-Server ↔ Backbone-Server (GRE) | Nein | Nein (statische `GRE_PEERS`-Liste, keine Authentifizierung auf dem Tunnel selbst) |
-| Backbone-Server ↔ Backbone-Server (BGP) | Nein | Nein (keine Session-Authentifizierung in `bird-peers.conf`) |
+| Backbone-Server ↔ Backbone-Server (BGP) | Nein | Nein (keine Session-Authentifizierung in der BIRD-Konfiguration) |
 
 Praktische Konsequenz für den Betrieb: Die Sicherheit des Backbones hängt maßgeblich
 davon ab, dass ausschließlich vertrauenswürdige, vom Team kontrollierte Server als

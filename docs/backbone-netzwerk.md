@@ -136,32 +136,37 @@ Ausfallsicherheit über mehrere, unterschiedlich angebundene Server hinweg zu or
 Dafür betreibt jeder Server **BIRD** (IPv4) und **BIRD6** (IPv6) — je einen eigenen
 BGP-Router:
 
-- `lib/bird.sh`/`lib/bird6.sh` tragen für **jeden** GRE-Peer eine eigene interne
-  BGP-Session ein (`template bgp intern`), die genau über die Link-Local-Adressen des
-  jeweiligen GRE-Tunnels läuft. Damit hat jeder Server eine direkte BGP-Session zu jedem
-  anderen Server — eine [BGP-Vollvermaschung](#grundlagen-was-ist-eine-vollvermaschung)
-  passend zur GRE-Vollvermaschung.
+- Die BIRD-Konfiguration wird vom Ansible-Playbook
+  [ffc-mash](https://github.com/FreifunkChemnitz/ffc-mash) erzeugt (Rolle `ffc_vpn_gateway`
+  → `/etc/bird/`). Für **jeden** Server aus der Inventory-Gruppe `routers` wird eine eigene
+  interne BGP-Session eingetragen (`template bgp intern`), die genau über die
+  Link-Local-Adressen des jeweiligen GRE-Tunnels läuft. Damit hat jeder Server eine direkte
+  BGP-Session zu jedem anderen Server — eine
+  [BGP-Vollvermaschung](#grundlagen-was-ist-eine-vollvermaschung) passend zur
+  GRE-Vollvermaschung.
 - Jeder Server bekommt eine Router-ID/AS-Nummer, die aus seiner öffentlichen IP abgeleitet
   wird (`169.254.<3.Oktett>.<4.Oktett>` bzw. AS `<3.Oktett><4.Oktett>`) — ein einfaches,
   kollisionsfreies Schema ganz ohne zentrale IP-/AS-Vergabe.
 - Über BGP announcen die Server sich gegenseitig Routen: die eigene öffentliche IP
-  (`__WANIP__/32`), das Mesh-Netz (`10.149.0.0/20`), die konfigurierten Service-Adressen
-  sowie — nur auf Servern mit `USE_RADVD=1` — eine IPv6-Default-Route über den eigenen
-  Internet-Uplink (`radvd_add_route "::/0" "$WANGW6" "$WANIF"`).
+  (`<WANIP>/32`), das Mesh-Netz (`10.149.0.0/20`, Umland `10.149.16.0/20`), die
+  konfigurierten Service-Adressen sowie — auf IPv6-Uplink-Servern
+  (`ffc_vpn_gateway_bird_ipv6_uplink`) — eine IPv6-Default-Route über den eigenen
+  Internet-Uplink.
 - Damit ein Server für Mesh-Verkehr eine **eigene Routingtabelle** neben der normalen
-  Internet-Routingtabelle nutzt, richtet `bird_init`/`bird6_init` Policy-Routing ein
-  (`ip rule` für `10.149.0.0/16` bzw. `ip -6 rule` für `ffc2::/64`/`ffc3::/64`,
+  Internet-Routingtabelle nutzt, richtet `bird_init`/`bird6_init` (in `lib/`) Policy-Routing
+  ein (`ip rule` für `10.149.0.0/16` bzw. `ip -6 rule` für `ffc2::/64`/`ffc3::/64`,
   Ziel-Tabelle `100`) und BIRD selbst schreibt seine gelernten Routen in genau diese
   Tabelle (`kernel table 100`). So kann Mesh-Verkehr andere Pfade/Gateways nehmen als
   regulärer Internet-Verkehr des Servers.
-- **Ausnahme-/Regionalrouten:** `bird_init` rendert beim Setup aus
-  `conf/routes/_global.conf` und `conf/routes/<COUNTRY>.conf` die Datei
-  `conf/bird-routes.country.conf` (Platzhalter `NEXTHOP` → `$WANGW`), die per `include` in
-  `protocol static` einfließt — so lassen sich einzelne Zielnetze gezielt über das lokale
-  WAN-Gateway statt übers Mesh routen (z. B. Uni-Netze, Wikimedia, GitHub). Die Routen
-  werden im Repo gepflegt (`conf/routes/`); früher wurden sie alle 5 Minuten per `bird_cron`
-  von `api.chemnitz.freifunk.net` nachgeladen (Issue #7).
-- **NAT/Internet-Zugang:** `iptables -t nat -A POSTROUTING -o $WANIF -j MASQUERADE` sorgt
+- **Ausnahme-/Regionalrouten:** Die Ansible-Rolle rendert aus
+  `files/bird-routes/_global.conf` und `files/bird-routes/<CC>.conf` die Datei
+  `/etc/bird/bird-routes.country.conf` (Platzhalter `NEXTHOP` → lokales WAN-Gateway), die
+  per `include` in `protocol static` einfließt — so lassen sich einzelne Zielnetze gezielt
+  über das lokale WAN-Gateway statt übers Mesh routen (z. B. Uni-Netze, Wikimedia, GitHub).
+  Die Routen werden im ffc-mash-Playbook gepflegt; früher wurden sie alle 5 Minuten per
+  `bird_cron` von `api.chemnitz.freifunk.net` nachgeladen (Issue #7).
+- **NAT/Internet-Zugang:** `iptables -t nat -A POSTROUTING -o $WANIF -j MASQUERADE` (in
+  `lib/bird.sh`) sorgt
   dafür, dass Mesh-Clients über die öffentliche IP des jeweiligen Servers ins Internet
   können, wenn dieser Server als ihr Gateway gewählt wird.
 
@@ -174,8 +179,8 @@ BGP-Router:
    Backbone-Server hinweg, mit denen der Router nie direkt verbunden ist.
 3. Will der Router ins Internet, wählt er (bzw. das Mesh) einen Gateway-Server; dessen
    **BIRD/BIRD6**-Instanz hat über BGP von allen anderen Servern gelernt, welche Netze wie
-   erreichbar sind, trifft Routingentscheidungen (inkl. der statischen Ausnahmerouten aus
-   `conf/routes/`) und NATet den
+   erreichbar sind, trifft Routingentscheidungen (inkl. der statischen, per Ansible
+   gepflegten Ausnahmerouten) und NATet den
    Verkehr über die eigene öffentliche IP ins Internet.
 4. Für Verkehr zwischen zwei Mesh-Teilnehmern an unterschiedlichen Servern reicht bereits die
    batman-adv-Ebene ([Layer 2](#grundlagen-was-ist-ein-layer-2-netz)) — BGP wird hier nur zur Verteilung der Dienst-/Uplink-Routen

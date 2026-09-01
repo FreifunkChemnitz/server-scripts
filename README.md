@@ -56,16 +56,15 @@ Ist ein Routing Deamon zur Verbindung mit anderen Netzen.
 # aptitude install bird
 ```
 
-Wenn sys-V-init verwendet wird:
-```
-# update-rc.d bird disable
-# update-rc.d bird6 disable
-```
+Die BIRD-/BIRD6-Konfiguration (`/etc/bird/bird.conf`, `/etc/bird/bird6.conf`,
+`/etc/bird/bird-routes.country.conf`) und die `bird`/`bird6`-Dienste werden vom
+Ansible-Playbook [ffc-mash](https://github.com/FreifunkChemnitz/ffc-mash) verwaltet
+(Rolle `ffc_vpn_gateway`), nicht von diesen Skripten. `lib/bird.sh` / `lib/bird6.sh`
+richten nur noch das Policy-Routing (Tabelle 100) und NAT ein.
 
-Wenn systemd verwendet wird:
 ```
-# systemctl disable bird
-# systemctl disable bird6
+# systemctl enable bird
+# systemctl enable bird6
 ```
 
 
@@ -136,19 +135,18 @@ Wenn systemd verwendet wird:
 
 ```
 cd /opt/freifunk/server-scripts/conf
-cp bird.conf bird.local.conf
-cp bird-routes.conf bird-routes.local.conf
 cp dnsmasq.conf dnsmasq.local.conf
 cp general.conf general.local.conf
-touch bird-routes.local.conf
 ```
 
-#### bird.local.conf
-In der `bird.local.conf` muss `__BIRD_ROUTER_ID__` angepasst werden. Es ist mit mit 169.254.x.y zu ersetzen, wobei x das 3. Oktet und y das 4. Oktet der öffentlichen IPv4 des Servers sind. Wenn der Server die öffentliche IPv4 5.199.142.119 hat, wäre das 169.254.142.119.
+#### BIRD / BGP
 
-`__BIRD_ROUTER_ASN__` muss durch das 3. und 4. Oktet der öffentlichen IPv4 ersetzt werden, wobei der Punkt wegzulassen ist. Zum Beispiel wird aus 5.199.142.119 dann 142119.
-
-Auf Servern, die für das Chemnitzer Umland bestimmt sind ist das `route` unter `protocol static` anzupassen. Es muss auf `10.149.16.0/20` geändert werden.
+Die BIRD-Konfiguration wird nicht mehr hier gepflegt, sondern vom Ansible-Playbook
+[ffc-mash](https://github.com/FreifunkChemnitz/ffc-mash) (Rolle `ffc_vpn_gateway`)
+nach `/etc/bird/` gerendert – inklusive Router-ID/ASN (aus der öffentlichen IPv4),
+BGP-Peers, Mesh-Route (Umland: `ffc_vpn_gateway_bird_mesh_route_v4: 10.149.16.0/20`)
+und der statischen Länder-/Ausnahmerouten. `lib/bird.sh` richtet nur noch
+Policy-Routing (Tabelle 100) und NAT ein.
 
 #### dnsmasq.local.conf
 
@@ -173,8 +171,9 @@ USE_RADVD="0"
 USE_MESHVIEWER="0"
 ```
 
-`COUNTRY` ist auf den 2 stelligen ISO-Code des Landes zu ändern, in dem der Server betrieben wird. Er wählt die passende Datei `conf/routes/<COUNTRY>.conf` mit den länderspezifischen Ausnahmerouten aus (zusätzlich zu `conf/routes/_global.conf`). Existiert keine solche Datei, werden nur die globalen Routen gerendert.
-`WANGW` ist das IPv4 Gateway des Server (`ip route show`). Über dieses Gateway werden die Ausnahmerouten aus `conf/routes/` geroutet (Platzhalter `NEXTHOP`). Ist `WANGW` leer, bleibt `conf/bird-routes.country.conf` leer.
+Das Land des Servers (früher `COUNTRY`) und die Länder-/Ausnahmerouten werden jetzt
+im ffc-mash-Playbook gepflegt (`ffc_vpn_gateway_country`,
+`roles/custom/ffc_vpn_gateway/files/bird-routes/`).
 
 `GRE_PEERS`, `LOG_DEBUG`, `LOG_TO` sollte gelöscht werden.
 

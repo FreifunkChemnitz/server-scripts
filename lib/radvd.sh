@@ -7,7 +7,10 @@ radvd_init() {
 	if [ "$USE_BIRD" != "1" ]; then
 		log_fatal_error "You must enable BIRD to use RADVD - please check configuration!"
 	fi
-	bird6_add_route "::/0" "$WANGW6" "$WANIF"
+	# The IPv6 default route (::/0) that BIRD6 announces for this uplink is now
+	# part of the Ansible-managed bird6 config: set
+	# ffc_vpn_gateway_bird_ipv6_uplink: true for this host in the ffc-mash
+	# playbook (ffc_vpn_gateway role).
 }
 
 radvd_start() {
