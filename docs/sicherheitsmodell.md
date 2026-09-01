@@ -42,6 +42,15 @@ Sicherheitsmodell verlässt sich hier offenbar auf die Absicherung der Server se
 Transportverschlüsselung zwischen ihnen. Diese Einschätzung ist eine Ableitung aus der
 Konfiguration, keine im Repository dokumentierte Policy-Aussage.
 
+## BIRD-Ausnahmerouten: statisch statt Laufzeit-Fetch
+
+Die Ausnahme-/Länderrouten für BIRD (`conf/routes/`, gerendert nach
+`conf/bird-routes.country.conf`) werden im Repo gepflegt und beim Setup gerendert.
+Früher lud `bird_cron` sie alle 5 Minuten per **unverschlüsseltem `http://`** von
+`api.chemnitz.freifunk.net` nach und ließ BIRD per `SIGHUP` neu laden — ein On-Path-Angreifer
+hätte darüber statische Routen in die Routingtabelle der Gateways injizieren können
+(Blackhole oder Umleitung übers lokale WAN). Dieser Pfad ist mit Issue #7 entfallen.
+
 ## Zusammenfassung
 
 | Strecke | Verschlüsselt? | Zugangskontrolle? |

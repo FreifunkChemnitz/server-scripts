@@ -154,10 +154,13 @@ BGP-Router:
   Ziel-Tabelle `100`) und BIRD selbst schreibt seine gelernten Routen in genau diese
   Tabelle (`kernel table 100`). So kann Mesh-Verkehr andere Pfade/Gateways nehmen als
   regulärer Internet-Verkehr des Servers.
-- **Geoblocking/Regionalrouten:** `bird_cron` lädt alle 5 Minuten eine länderspezifische
-  Routenliste von `api.chemnitz.freifunk.net` (`COUNTRY`, `APIKEY`) nach
-  `conf/bird-routes.country.conf` und lässt BIRD per `SIGHUP` neu konfigurieren — so lassen
-  sich z. B. bestimmte Zielnetze nur über Server in einem bestimmten Land routen.
+- **Ausnahme-/Regionalrouten:** `bird_init` rendert beim Setup aus
+  `conf/routes/_global.conf` und `conf/routes/<COUNTRY>.conf` die Datei
+  `conf/bird-routes.country.conf` (Platzhalter `NEXTHOP` → `$WANGW`), die per `include` in
+  `protocol static` einfließt — so lassen sich einzelne Zielnetze gezielt über das lokale
+  WAN-Gateway statt übers Mesh routen (z. B. Uni-Netze, Wikimedia, GitHub). Die Routen
+  werden im Repo gepflegt (`conf/routes/`); früher wurden sie alle 5 Minuten per `bird_cron`
+  von `api.chemnitz.freifunk.net` nachgeladen (Issue #7).
 - **NAT/Internet-Zugang:** `iptables -t nat -A POSTROUTING -o $WANIF -j MASQUERADE` sorgt
   dafür, dass Mesh-Clients über die öffentliche IP des jeweiligen Servers ins Internet
   können, wenn dieser Server als ihr Gateway gewählt wird.
@@ -171,7 +174,8 @@ BGP-Router:
    Backbone-Server hinweg, mit denen der Router nie direkt verbunden ist.
 3. Will der Router ins Internet, wählt er (bzw. das Mesh) einen Gateway-Server; dessen
    **BIRD/BIRD6**-Instanz hat über BGP von allen anderen Servern gelernt, welche Netze wie
-   erreichbar sind, trifft Routingentscheidungen (inkl. Geoblocking-Regeln) und NATet den
+   erreichbar sind, trifft Routingentscheidungen (inkl. der statischen Ausnahmerouten aus
+   `conf/routes/`) und NATet den
    Verkehr über die eigene öffentliche IP ins Internet.
 4. Für Verkehr zwischen zwei Mesh-Teilnehmern an unterschiedlichen Servern reicht bereits die
    batman-adv-Ebene ([Layer 2](#grundlagen-was-ist-ein-layer-2-netz)) — BGP wird hier nur zur Verteilung der Dienst-/Uplink-Routen
