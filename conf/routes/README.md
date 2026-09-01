@@ -4,7 +4,12 @@ Diese Dateien ersetzen den früheren Laufzeit-Abruf von
 `http://api.chemnitz.freifunk.net/request.php?region=$COUNTRY` (siehe
 [Issue #7](https://github.com/FreifunkChemnitz/server-scripts/issues/7)).
 Sie werden im Repo gepflegt und beim Setup (`ffc_start` → `bird_init`) zu
-`conf/bird-routes.country.conf` gerendert. Diese generierte Datei ist in
+`conf/bird-routes.country.conf` gerendert.
+
+Damit entfällt der einzige Consumer von `request.php`; das ist die Voraussetzung,
+um `api.chemnitz.freifunk.net` zu dockerisieren bzw. ins Mash-Playbook zu
+überführen und das `routing-backend` (PHP/Smarty + MySQL auf curie) abzukündigen –
+[ffc-mash#55](https://github.com/FreifunkChemnitz/ffc-mash/issues/55). Diese generierte Datei ist in
 `conf/.gitignore` und wird von `conf/bird.conf` per
 `include "bird-routes.country.conf"` in `protocol static` eingebunden.
 
