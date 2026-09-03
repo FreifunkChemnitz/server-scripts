@@ -30,7 +30,7 @@ bird_init() {
 		fi
 	done
 
-	touch conf/bird-routes.country.conf
+	bird_render_country_routes
 
 	ip rule add from 10.149.0.0/16 lookup 100
 	ip rule add to 10.149.0.0/16 lookup 100
@@ -54,11 +54,17 @@ bird_stop() {
 	killall bird >> /dev/null 2>&1
 }
 
-bird_cron() {
-	if [ -n $WANGW ]; then
-		wget "http://api.chemnitz.freifunk.net/request.php?region=$COUNTRY" -q -O conf/bird-routes.country.conf
-		sed -e "s/NEXTHOP/$WANGW/g" -i "conf/bird-routes.country.conf"
-		killall bird -s SIGHUP
+# Render the static country/exception routes into bird-routes.country.conf.
+# Combines conf/routes/_global.conf with the per-country file (if present)
+# and substitutes the NEXTHOP placeholder with the local WAN gateway.
+# No network access - the routes are maintained in the repo (see conf/routes/).
+bird_render_country_routes() {
+	local out="conf/bird-routes.country.conf"
+	: > "$out"
+	if [ -n "$WANGW" ]; then
+		[ -f "conf/routes/_global.conf" ] && cat "conf/routes/_global.conf" >> "$out"
+		[ -n "$COUNTRY" ] && [ -f "conf/routes/${COUNTRY}.conf" ] && cat "conf/routes/${COUNTRY}.conf" >> "$out"
+		sed -e "s/NEXTHOP/$WANGW/g" -i "$out"
 	fi
 }
 

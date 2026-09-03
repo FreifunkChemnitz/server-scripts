@@ -70,8 +70,9 @@ Vorgehen bei einer solchen Meldung:
   die einzige Quelle für Watchdog-Mails.**
 - `dnsmasq_cron`, `radvd_cron` (jede Minute): starten den jeweiligen Dienst still neu,
   falls er nicht läuft — ohne Logging oder Mail, auch bei Erfolg oder Misserfolg.
-- `bird_cron` (alle 5 Minuten): lädt nur die Geoblocking-Routen nach, meldet dabei keine
-  Fehler.
+
+BIRD hat keine `*_cron`-Funktion mehr: die Ausnahme-/Regionalrouten werden beim Setup aus
+`conf/routes/` gerendert, nicht mehr zur Laufzeit nachgeladen (Issue #7).
 
 Eine Watchdog-Mail bedeutet also praktisch immer: ein GRE-Tunnel ist (vermeintlich)
 ausgefallen.
