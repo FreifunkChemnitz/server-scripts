@@ -1,5 +1,10 @@
 # server-scripts
 
+## Dokumentation
+
+Eine Übersicht über die Architektur des Repositories sowie eine Erklärung, wie das
+Freifunk-Backbone auf Netzwerkebene funktioniert, findet sich unter [`docs/`](docs/README.md).
+
 ## Skripte installieren
 
 ```
@@ -168,9 +173,8 @@ USE_RADVD="0"
 USE_MESHVIEWER="0"
 ```
 
-`COUNTRY` ist auf den 2 stelligen ISO-Code des Landes zu ändern, in dem der Server betrieben wird.
-`APIKEY` wird vom Freifunk Chemnitz Team vergeben und ist daher zu erfragen.
-`WANGW` ist das IPv4 Gateway des Server. `ip route show`
+`COUNTRY` ist auf den 2 stelligen ISO-Code des Landes zu ändern, in dem der Server betrieben wird. Er wählt die passende Datei `conf/routes/<COUNTRY>.conf` mit den länderspezifischen Ausnahmerouten aus (zusätzlich zu `conf/routes/_global.conf`). Existiert keine solche Datei, werden nur die globalen Routen gerendert.
+`WANGW` ist das IPv4 Gateway des Server (`ip route show`). Über dieses Gateway werden die Ausnahmerouten aus `conf/routes/` geroutet (Platzhalter `NEXTHOP`). Ist `WANGW` leer, bleibt `conf/bird-routes.country.conf` leer.
 
 `GRE_PEERS`, `LOG_DEBUG`, `LOG_TO` sollte gelöscht werden.
 
