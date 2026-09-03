@@ -37,6 +37,7 @@ bird_init() {
 	ip route add default via 127.0.0.1 table 100 metric 1024
 
 	iptables -t nat -A POSTROUTING -o $WANIF -j MASQUERADE
+	iptables -P FORWARD ACCEPT
 }
 
 # Check for route
