@@ -91,7 +91,7 @@ aktiv (`USE_RADVD=1`, erfordert `USE_BIRD=1`), gesteuert über `lib/radvd.sh`.
 | `lib/gre.sh` | Baut die GRE-Tunnel zu allen in `GRE_PEERS` gelisteten Servern auf/ab und prüft im Watchdog per ICMPv6-Ping, ob sie noch erreichbar sind. |
 | `lib/batman.sh` | Initialisiert batman-adv, hängt GRE- und fastd-Interfaces ein, konfiguriert `bat0` (Service-Adressen, Bridge-Loop-Avoidance, Bonding) und startet `alfred`/`batadv-vis`. |
 | `lib/fastd.sh` | Startet/stoppt die fastd-Prozesse für den Client-Zugang. |
-| `lib/bird.sh` / `lib/bird6.sh` | Generieren die BIRD-/BIRD6-Konfiguration aus den Templates in `conf/`, tragen BGP-Peers und Routen ein, richten Policy-Routing (Tabelle 100) und NAT ein, laden per Watchdog die Geoblocking-Routen nach. |
+| `lib/bird.sh` / `lib/bird6.sh` | Generieren die BIRD-/BIRD6-Konfiguration aus den Templates in `conf/`, tragen BGP-Peers und Routen ein, richten Policy-Routing (Tabelle 100) und NAT ein. `bird_init` rendert zusätzlich die statischen Ausnahmerouten aus `conf/routes/` nach `conf/bird-routes.country.conf`. |
 | `lib/dnsmasq.sh` | Generiert die dnsmasq-Konfiguration und startet/überwacht den Dienst. |
 | `lib/radvd.sh` | Startet/überwacht radvd und trägt die IPv6-Default-Route in BIRD6 ein. |
 | `lib/meshviewer.sh` | Startet `alfred`/`batadv-vis` eigenständig, falls der Server unabhängig von `lib/batman.sh` primär als Meshviewer-Datenquelle dienen soll. |
@@ -100,7 +100,8 @@ aktiv (`USE_RADVD=1`, erfordert `USE_BIRD=1`), gesteuert über `lib/radvd.sh`.
 
 | Datei | Zweck |
 |---|---|
-| `general.conf` (+ `general.local.conf`) | Zentrale Server-Konfiguration: Netzwerk-Interface/IP, Feature-Flags (`USE_*`), GRE-Peer-Liste, Geoblocking-Einstellungen. Die `.local.conf`-Variante enthält die serverspezifischen, nicht versionierten Werte. |
+| `general.conf` (+ `general.local.conf`) | Zentrale Server-Konfiguration: Netzwerk-Interface/IP, Feature-Flags (`USE_*`), GRE-Peer-Liste, `COUNTRY`/`WANGW` für die Ausnahmerouten. Die `.local.conf`-Variante enthält die serverspezifischen, nicht versionierten Werte. |
+| `routes/*.conf` | Statisch gepflegte BIRD-Ausnahme-/Länderrouten: `_global.conf` (überall) + `<COUNTRY>.conf` (pro Land), Platzhalter `NEXTHOP`. Siehe `conf/routes/README.md`. |
 | `bird.conf`, `bird6.conf` | Templates für die BIRD-/BIRD6-Hauptkonfiguration inkl. Policy-Routing-Tabelle `ffc`. |
 | `bird-peers.conf` | Template für eine einzelne BGP-Peer-Definition, wird pro GRE-Peer in `bird-peers.local.conf`/`bird6-peers.local.conf` dupliziert. |
 | `bird-routes.conf` | Template für eine einzelne statische Route, wird pro Service-Adresse dupliziert. |

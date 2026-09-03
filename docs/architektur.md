@@ -15,6 +15,7 @@ und per Cron überwacht werden.
 | `initd-ffc.sh` | Dünner Wrapper, der `ffc-server.sh` als `/etc/init.d/ffc` einbindet (SysV-Init). |
 | `lib/*.sh` | Ein Modul pro Dienst/Funktion (siehe unten). Jedes Modul stellt `<name>_init`, `<name>_start`, `<name>_stop` und optional `<name>_cron` bereit. |
 | `conf/*.conf` | Eingecheckte Vorlagen/Defaults. Pro Server werden daraus `*.local.conf`-Dateien erzeugt bzw. von Hand angelegt (siehe `conf/.gitignore`: `*.local.*` und `bird-routes.country.conf` sind lokal/generiert und nicht versioniert). |
+| `conf/routes/*.conf` | Statisch gepflegte BIRD-Ausnahme-/Länderrouten (`_global.conf` + `<COUNTRY>.conf`), die `bird_init` zu `conf/bird-routes.country.conf` rendert. |
 
 ## Die Module in `lib/`
 
@@ -57,7 +58,7 @@ flowchart TD
     stop --> rules[ip rule delete lookup 100]
 
     ffc -->|watchdog, jedes 1 Min| wd1["meshviewer_cron, radvd_cron,\ndnsmasq_cron (Prozess-Check)"]
-    ffc -->|watchdog, alle 5 Min| wd2["gre_cron (Tunnel-Ping-Check),\nbird_cron (Länder-Routen nachladen)"]
+    ffc -->|watchdog, alle 5 Min| wd2["gre_cron (Tunnel-Ping-Check)"]
 ```
 
 Wichtige Details zum Ablauf:
