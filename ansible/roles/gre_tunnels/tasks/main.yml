@@ -1,0 +1,100 @@
+---
+- name: Verify required GRE variables are set
+  ansible.builtin.assert:
+    that:
+      - gre_wanip is defined and gre_wanip | length > 0
+      - gre_peers is defined
+    fail_msg: "gre_wanip and gre_peers must be set (see role defaults)"
+
+- name: Ensure systemd-networkd is enabled and running
+  ansible.builtin.systemd:
+    name: systemd-networkd
+    enabled: true
+    state: started
+
+- name: Determine active GRE peers (exclude ourselves)
+  ansible.builtin.set_fact:
+    gre_active_peers: "{{ gre_peers | rejectattr('ip', 'equalto', gre_wanip) | list }}"
+
+- name: Deploy GRE tunnel netdev units
+  ansible.builtin.template:
+    src: gre-tunnel.netdev.j2
+    dest: "/etc/systemd/network/{{ gre_networkd_priority }}-gre-{{ item.name }}.netdev"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ gre_active_peers }}"
+  loop_control:
+    label: "{{ item.name }}"
+  notify: restart systemd-networkd
+
+- name: Deploy GRE tunnel network units
+  ansible.builtin.template:
+    src: gre-tunnel.network.j2
+    dest: "/etc/systemd/network/{{ gre_networkd_priority }}-gre-{{ item.name }}.network"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ gre_active_peers }}"
+  loop_control:
+    label: "{{ item.name }}"
+  notify: restart systemd-networkd
+
+- name: Find existing GRE unit files
+  ansible.builtin.find:
+    paths: /etc/systemd/network
+    patterns: "*-gre-*.netdev,*-gre-*.network"
+  register: gre_existing_units
+
+- name: Remove GRE unit files for peers no longer configured
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ gre_existing_units.files }}"
+  loop_control:
+    label: "{{ item.path | basename }}"
+  when: >
+    (item.path | basename | regex_replace('^[0-9]+-gre-(.*)\.(netdev|network)$', '\1'))
+    not in (gre_active_peers | map(attribute='name') | list)
+  notify: restart systemd-networkd
+
+- name: Deploy GRE tunnel watchdog script
+  ansible.builtin.template:
+    src: gre-watchdog.sh.j2
+    dest: "{{ gre_watchdog_script_path }}"
+    owner: root
+    group: root
+    mode: "0755"
+  when: gre_watchdog_enabled
+
+- name: Deploy GRE tunnel watchdog systemd service
+  ansible.builtin.template:
+    src: gre-watchdog.service.j2
+    dest: /etc/systemd/system/gre-watchdog.service
+    owner: root
+    group: root
+    mode: "0644"
+  when: gre_watchdog_enabled
+  notify:
+    - reload systemd daemon
+    - restart gre-watchdog timer
+
+- name: Deploy GRE tunnel watchdog systemd timer
+  ansible.builtin.template:
+    src: gre-watchdog.timer.j2
+    dest: /etc/systemd/system/gre-watchdog.timer
+    owner: root
+    group: root
+    mode: "0644"
+  when: gre_watchdog_enabled
+  notify:
+    - reload systemd daemon
+    - restart gre-watchdog timer
+
+- name: Enable and start GRE tunnel watchdog timer
+  ansible.builtin.systemd:
+    name: gre-watchdog.timer
+    enabled: true
+    state: started
+    daemon_reload: true
+  when: gre_watchdog_enabled

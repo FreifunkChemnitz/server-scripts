@@ -1,0 +1,24 @@
+---
+# Public IPv4 address of this server, equivalent to WANIP in conf/general.conf
+gre_wanip: ""
+
+# Priority prefix for the systemd-networkd unit files (controls apply order)
+gre_networkd_priority: "25"
+
+# GRE backbone peers, equivalent to GRE_PEERS in conf/general.conf.
+# The peer whose ip matches gre_wanip is skipped automatically.
+# Example:
+# gre_peers:
+#   - { name: brewster, ip: 217.79.184.109 }
+#   - { name: newton, ip: 78.46.48.196 }
+gre_peers: []
+
+# Periodic liveness check, equivalent to gre_cron()/gre_check_tunnel() plus
+# the "watchdog" cron entry described in README.md.
+gre_watchdog_enabled: true
+gre_watchdog_script_path: /usr/local/lib/ffc/gre-watchdog.sh
+gre_watchdog_interval: "5min"
+
+# Mail recipient for alerts, equivalent to LOG_TO in conf/general.conf.
+# Leave empty to only log to syslog and skip mail alerts.
+gre_watchdog_mail_to: ""

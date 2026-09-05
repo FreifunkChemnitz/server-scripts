@@ -1,0 +1,9 @@
+{{ ansible_managed | comment }}
+[NetDev]
+Name=gre-{{ item.name }}
+Kind=gretap
+
+[Tunnel]
+Local={{ gre_wanip }}
+Remote={{ item.ip }}
+TTL=255

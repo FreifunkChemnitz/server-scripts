@@ -1,0 +1,17 @@
+---
+# gre_wanip must be set per host (host_vars), matching WANIP in
+# conf/general.local.conf.
+
+# Equivalent to GRE_PEERS in conf/general.conf.
+gre_peers:
+  - { name: brewster, ip: 217.79.184.109 }
+  - { name: newton, ip: 78.46.48.196 }
+  - { name: archimedes, ip: 162.252.172.175 }
+  - { name: descartes, ip: 144.76.4.100 }
+  - { name: kohn, ip: 91.194.84.98 }
+  - { name: spooner, ip: 51.158.152.84 }
+  - { name: hawking, ip: 163.172.25.179 }
+  - { name: noether, ip: 93.186.197.162 }
+
+# Equivalent to LOG_TO in conf/general.conf.
+gre_watchdog_mail_to: "crew@chemnitz.freifunk.net"

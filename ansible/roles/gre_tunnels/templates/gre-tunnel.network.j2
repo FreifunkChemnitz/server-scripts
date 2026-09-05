@@ -1,0 +1,17 @@
+{{ ansible_managed | comment }}
+[Match]
+Name=gre-{{ item.name }}
+
+[Link]
+MTUBytes=1426
+
+[Network]
+LinkLocalAddressing=no
+
+[Address]
+Address=169.254.{{ gre_wanip.split('.')[2] }}.{{ gre_wanip.split('.')[3] }}/32
+Peer=169.254.{{ item.ip.split('.')[2] }}.{{ item.ip.split('.')[3] }}/32
+Scope=link
+
+[Address]
+Address=fe80::ffc:{{ '%x' % (gre_wanip.split('.')[2] | int) }}:{{ '%x' % (gre_wanip.split('.')[3] | int) }}/64
