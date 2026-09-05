@@ -40,7 +40,7 @@ Routing- oder batman-adv-Ebene.
 | Bereich | Zweck |
 |---|---|
 | `2001:bc8:3f13:ffc2::/64` | IPv6-Präfix, das `radvd` auf `bat0` per Router Advertisement announced (SLAAC für Mesh-Clients). |
-| `2001:bc8:3f13:ffc3::/64` | Zweites IPv6-Präfix, in `conf/radvd.conf` für ein Interface `bat1` konfiguriert. In den `lib/*.sh`-Skripten wird ausschließlich `bat0` automatisiert aufgebaut — der genaue Zweck/Betriebsstatus von `bat1`/`ffc3` ist anhand des Codes allein nicht abschließend zu klären und sollte im Zweifel beim Team erfragt werden. |
+| `2001:bc8:3f13:ffc3::/64` | IPv6-Präfix der Region Umland, das `radvd` auf `bat0` per Router Advertisement announced. Läuft auf den für Umland zuständigen Backbone-Servern (aktuell descartes, kohn) — `USE_RADVD` muss dort in `general.local.conf` aktiviert werden. |
 | `fe80::ffc:<hex 3. Oktett>:<hex 4. Oktett>/64` | IPv6-Link-Local-Adresse eines Backbone-Servers auf seinen GRE-Tunnel-Interfaces, das IPv6-Gegenstück zur `169.254.x.y`-Adresse oben. |
 | DNS-Resolver (RDNSS, `radvd.conf`) | `2001:0bc8:3f13:ffc2::1` und `…ffc2::53` (mesh-interne Resolver), sowie `2a01:4f8:110:1405::1` (externer Resolver) werden den Mesh-Clients announced. |
 
