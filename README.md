@@ -10,7 +10,7 @@ Freifunk-Backbone auf Netzwerkebene funktioniert, findet sich unter [`docs/`](do
 ```
 # aptitude install git
 $ mkdir /opt/freifunk
-$ git clone https://gitlab.com/FreifunkChemnitz/server-scripts.git /opt/freifunk/server-scripts
+$ git clone https://github.com/FreifunkChemnitz/server-scripts.git /opt/freifunk/server-scripts
 ```
 
 ## Benötigte Software installieren
